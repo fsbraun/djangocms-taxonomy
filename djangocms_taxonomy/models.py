@@ -185,7 +185,7 @@ class Category(TranslatableModel):
         Returns:
             The category name.
         """
-        return self.name
+        return f"{self.name} ({self.parent.name})" if self.parent else self.name
 
 
 class CategoryRelation(models.Model):

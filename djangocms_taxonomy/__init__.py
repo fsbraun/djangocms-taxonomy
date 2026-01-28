@@ -3,19 +3,24 @@
 __version__ = "1.0.0"
 
 __all__ = [
+    "CategoryMixin",
     "CategoryAdminMixin",
     "CategoryFormMixin",
 ]
 
 
 def __getattr__(name: str):
-    """Lazily import admin mixins to avoid app registry issues."""
-    if name == "CategoryAdminMixin":
-        from .admin_mixins import CategoryAdminMixin
+    """Lazily import mixins to avoid app registry issues."""
+    if name == "CategoryMixin":
+        from .mixins import CategoryMixin
+
+        return CategoryMixin
+    elif name == "CategoryAdminMixin":
+        from .mixins import CategoryAdminMixin
 
         return CategoryAdminMixin
     elif name == "CategoryFormMixin":
-        from .admin_mixins import CategoryFormMixin
+        from .mixins import CategoryFormMixin
 
         return CategoryFormMixin
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

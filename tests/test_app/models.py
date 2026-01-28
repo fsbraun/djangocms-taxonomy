@@ -2,8 +2,10 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from djangocms_taxonomy.mixins import CategoryMixin
 
-class TestModel(models.Model):
+
+class TestModel(CategoryMixin, models.Model):
     """
     A test model to verify generic foreign key functionality with Category.
     """

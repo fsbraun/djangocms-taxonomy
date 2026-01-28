@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from djangocms_taxonomy.admin_mixins import CategoryAdminMixin
+from djangocms_taxonomy.mixins import CategoryAdminMixin
 
 from .models import TestModel
 

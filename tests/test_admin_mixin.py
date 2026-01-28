@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 
-from djangocms_taxonomy.admin_mixins import CategoryAdminMixin
+from djangocms_taxonomy.mixins import CategoryAdminMixin
 from djangocms_taxonomy.models import Category, CategoryRelation
 from tests.test_app.models import TestModel
 
