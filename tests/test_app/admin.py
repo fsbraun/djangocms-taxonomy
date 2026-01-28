@@ -1,9 +1,11 @@
 from django.contrib import admin
 
+from djangocms_taxonomy.admin_mixins import CategoryAdminMixin
+
 from .models import TestModel
 
 
 @admin.register(TestModel)
-class TestModelAdmin(admin.ModelAdmin):
+class TestModelAdmin(CategoryAdminMixin, admin.ModelAdmin):
     list_display = ("title", "description")
     search_fields = ("title",)
