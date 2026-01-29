@@ -197,30 +197,33 @@ class CategoryAdminMixin:
     class CategoryRelationListFilter(admin.SimpleListFilter):
         title = _("Category")
         parameter_name = "category"
+        template = "admin/djangocms_taxonomy/category_autocomplete_filter.html"
+
+        def __init__(self, request: Any, params: Any, model: type[Model], model_admin: admin.ModelAdmin) -> None:
+            super().__init__(request, params, model, model_admin)
+            self._selected_category: Category | None = None
+            value = self.value()
+            if value and value != "__none__" and str(value).isdigit():
+                self._selected_category = Category.objects.filter(pk=int(value)).first()
+
+        @property
+        def selected_category(self) -> Category | None:
+            return self._selected_category
+
+        @property
+        def selected_category_label(self) -> str:
+            if not self._selected_category:
+                return ""
+            return (
+                self._selected_category.safe_translation_getter("name", any_language=True)
+                or getattr(self._selected_category, "slug", None)
+                or str(self._selected_category.pk)
+            )
 
         def lookups(self, request: Any, model_admin: admin.ModelAdmin):
-            categories = (
-                Category.objects.all()
-                .with_tree_fields()
-                .prefetch_related("translations")
-                .order_by("path")
-            )
-            lookups: list[tuple[str, str]] = [("__none__", str(_("No category")))]
-            lookups.extend(
-                (
-                    str(category.pk),
-                    (
-                        ("— " * int(getattr(category, "depth", 0)))
-                        + (
-                            category.safe_translation_getter("name", any_language=True)
-                            or getattr(category, "slug", None)
-                            or str(category.pk)
-                        )
-                    ),
-                )
-                for category in categories
-            )
-            return lookups
+            # Kept for API compatibility; the custom template renders an
+            # autocomplete widget instead of a long list.
+            return [("__none__", str(_("No category")))]
 
         def queryset(self, request: Any, queryset: QuerySet):
             value = self.value()

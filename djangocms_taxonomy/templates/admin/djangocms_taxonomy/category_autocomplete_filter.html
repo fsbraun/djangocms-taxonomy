@@ -1,0 +1,106 @@
+{% load i18n static %}
+
+<link rel="stylesheet" href="{% static 'admin/css/vendor/select2/select2.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/autocomplete.css' %}">
+<script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'admin/js/vendor/select2/select2.full.min.js' %}"></script>
+
+<h3>{% blocktranslate with filter_title=spec.title %}By {{ filter_title }}{% endblocktranslate %}</h3>
+<ul>
+  <li>
+    {% if not spec.value %}
+      <strong>{% translate 'All' %}</strong>
+    {% else %}
+      <a href="?">{% translate 'All' %}</a>
+    {% endif %}
+  </li>
+  <li>
+    {% if spec.value == '__none__' %}
+      <strong>{% translate 'Uncategorized' %}</strong>
+    {% else %}
+      <a href="?{{ spec.parameter_name }}=__none__">{% translate 'Uncategorized' %}</a>
+    {% endif %}
+    </li>
+  <li>
+        <div class="admin-filter-category-autocomplete">
+        <select
+            id="id_{{ spec.parameter_name }}_filter"
+            class="admin-autocomplete"
+            data-ajax--url="{% url 'admin:autocomplete' %}"
+            data-app-label="djangocms_taxonomy"
+            data-model-name="categoryrelation"
+            data-field-name="category"
+            data-placeholder="{% translate 'Search categories' %}"
+        >
+            <option value="" {% if not spec.value %}selected{% endif %}>{% translate 'All' %}</option>
+            {% if spec.selected_category %}
+            <option value="{{ spec.selected_category.pk }}" selected>{{ spec.selected_category_label }}</option>
+            {% endif %}
+        </select>
+        </div>
+    </li>
+</ul>
+
+<script>
+  (function() {
+    const select = document.getElementById('id_{{ spec.parameter_name }}_filter');
+    if (!select) return;
+
+    function applyFilterFromSelect() {
+      const url = new URL(window.location.href);
+      const value = select.value;
+
+      // Reset pagination when changing filters.
+      url.searchParams.delete('p');
+
+      if (value) {
+        url.searchParams.set('{{ spec.parameter_name }}', value);
+      } else {
+        url.searchParams.delete('{{ spec.parameter_name }}');
+      }
+
+      window.location.href = url.toString();
+    }
+
+    // Initialize Select2 for the sidebar filter. We point it at Django's
+    // built-in admin autocomplete endpoint.
+    // Note: We intentionally do NOT load admin/js/autocomplete.js here because
+    // it expects data-ajax--url attributes like the form widgets have.
+    const $ = window.jQuery;
+    if ($ && $(select).select2) {
+      const autocompleteUrl = select.getAttribute('data-ajax--url');
+      $(select).select2({
+        width: 'style',
+        allowClear: true,
+        placeholder: select.dataset.placeholder || '',
+        ajax: {
+          url: autocompleteUrl,
+          dataType: 'json',
+          delay: 250,
+          data: function(params) {
+            return {
+              term: params.term,
+              page: params.page || 1,
+              app_label: select.dataset.appLabel,
+              model_name: select.dataset.modelName,
+              field_name: select.dataset.fieldName
+            };
+          },
+          processResults: function(data) {
+            // Django already returns {results: [...], pagination: {more: ...}}
+            return data;
+          }
+        }
+      });
+
+      // Select2 triggers change events through jQuery; native listeners won't
+      // see those. Bind through jQuery to ensure selection updates the filter.
+      $(select).on('change', applyFilterFromSelect);
+      $(select).on('select2:select select2:clear', applyFilterFromSelect);
+      return;
+    }
+
+    // Fallback if Select2 isn't available.
+    select.addEventListener('change', applyFilterFromSelect);
+  })();
+</script>

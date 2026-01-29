@@ -214,3 +214,9 @@ class TestCategoryAdminMixin:
         )
         qs_none = flt_none.queryset(request_none, TestModel.objects.all())
         assert list(qs_none.order_by("pk").values_list("pk", flat=True)) == [obj_without_cat.pk]
+
+    def test_category_list_filter_uses_custom_template(self) -> None:
+        from tests.test_app.admin import TestModelAdmin
+
+        admin_instance = TestModelAdmin(TestModel, AdminSite())
+        assert "category_autocomplete_filter.html" in admin_instance.CategoryRelationListFilter.template
