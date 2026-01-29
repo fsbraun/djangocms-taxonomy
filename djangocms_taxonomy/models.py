@@ -99,6 +99,43 @@ class CategoryQuerySet(TranslatableQuerySet):
         return self.filter(children__isnull=True)
 
 
+class CategoryManager(models.Manager.from_queryset(CategoryQuerySet)):
+    """Category manager exposing CategoryQuerySet helpers."""
+
+    def descendants_of(self, category: "Category | int", *, include_self: bool = False) -> "CategoryQuerySet":
+        """Return all descendants of a given category using a recursive CTE.
+
+        Args:
+            category: Category instance or primary key.
+            include_self: Include the given category itself in the result.
+
+        Returns:
+            QuerySet of descendant Category objects.
+        """
+
+        category_id = category.pk if isinstance(category, Category) else int(category)
+
+        def make_cte(cte) -> models.QuerySet:
+            return (
+                # Seed the CTE with the starting node to keep everything inside
+                # a single WITH RECURSIVE expression.
+                self.model.objects.filter(id=category_id)
+                .order_by()
+                .values("id", "parent_id")
+                .union(
+                    cte.join(self.model, parent_id=cte.col.id).order_by().values("id", "parent_id"),
+                    all=True,
+                )
+            )
+
+        cte = CTE.recursive(make_cte)
+        qs = with_cte(cte, select=cte.join(self.model, id=cte.col.id)).distinct()
+        if include_self:
+            return qs
+        return qs.exclude(pk=category_id)
+
+
+
 class Category(TranslatableModel):
     """
     A hierarchical category model for taxonomy management.
@@ -155,7 +192,7 @@ class Category(TranslatableModel):
     )
 
     # Custom manager with optimizations
-    objects = CategoryQuerySet.as_manager()
+    objects = CategoryManager()
 
     class Meta:
         verbose_name = _("category")

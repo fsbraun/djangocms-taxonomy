@@ -211,3 +211,36 @@ class TestCategoryTreeQueries:
         assert cat.description == "Test description"
         assert hasattr(cat, "path")
         assert hasattr(cat, "depth")
+
+    def test_descendants_of_returns_all_descendants(self):
+        root = Category.objects.create(slug="root")
+        root.set_current_language("en")
+        root.name = "Root"
+        root.save()
+
+        child = Category.objects.create(slug="child", parent=root)
+        child.set_current_language("en")
+        child.name = "Child"
+        child.save()
+
+        grandchild = Category.objects.create(slug="grandchild", parent=child)
+        grandchild.set_current_language("en")
+        grandchild.name = "Grandchild"
+        grandchild.save()
+
+        descendants = Category.objects.descendants_of(root)
+        assert set(descendants.values_list("slug", flat=True)) == {"child", "grandchild"}
+
+    def test_descendants_of_include_self(self):
+        root = Category.objects.create(slug="root")
+        root.set_current_language("en")
+        root.name = "Root"
+        root.save()
+
+        child = Category.objects.create(slug="child", parent=root)
+        child.set_current_language("en")
+        child.name = "Child"
+        child.save()
+
+        descendants = Category.objects.descendants_of(root, include_self=True)
+        assert set(descendants.values_list("slug", flat=True)) == {"root", "child"}

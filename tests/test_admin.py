@@ -173,3 +173,37 @@ class TestCategoryAdmin:
         """Test that slug is prepopulated from name."""
         assert "slug" in self.admin.prepopulated_fields
         assert self.admin.prepopulated_fields["slug"] == ("name",)
+
+    def test_parent_field_excludes_self_and_descendants(self):
+        """Parent selection must not allow cycles (self/descendants)."""
+        root = Category.objects.create(slug="root")
+        root.set_current_language("en")
+        root.name = "Root"
+        root.save()
+
+        child = Category.objects.create(slug="child", parent=root)
+        child.set_current_language("en")
+        child.name = "Child"
+        child.save()
+
+        grandchild = Category.objects.create(slug="grandchild", parent=child)
+        grandchild.set_current_language("en")
+        grandchild.name = "Grandchild"
+        grandchild.save()
+
+        other_root = Category.objects.create(slug="other")
+        other_root.set_current_language("en")
+        other_root.name = "Other"
+        other_root.save()
+
+        request = self.factory.get(f"/admin/djangocms_taxonomy/category/{child.pk}/change/")
+        request.user = self.user
+
+        form_class = self.admin.get_form(request, obj=child)
+        form = form_class(instance=child)
+
+        parent_qs = form.fields["parent"].queryset
+        assert root in parent_qs
+        assert other_root in parent_qs
+        assert child not in parent_qs
+        assert grandchild not in parent_qs

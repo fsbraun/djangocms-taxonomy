@@ -47,6 +47,17 @@ class CategoryAdmin(TranslatableAdmin):
         # Add tree fields with path and depth for hierarchical ordering
         return qs.with_tree_fields()
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj=obj, **kwargs)
+
+        # Prevent cycles: a category cannot be its own parent, nor can it be
+        # placed under any of its descendants.
+        if obj is not None and "parent" in form.base_fields:
+            excluded_ids = Category.objects.descendants_of(obj, include_self=True).values_list("pk", flat=True)
+            form.base_fields["parent"].queryset = Category.objects.exclude(pk__in=excluded_ids)
+
+        return form
+
     @admin.display(
         description=_("Name"),
         ordering="path",
