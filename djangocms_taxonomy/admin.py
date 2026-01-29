@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.apps import apps as django_apps
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -58,3 +59,26 @@ class CategoryAdmin(TranslatableAdmin):
             indent = "&nbsp;" * 4 * obj.depth
             return format_html("{}{}", mark_safe(indent), obj.name)
         return obj.name
+
+
+if django_apps.is_installed("taggit"):
+    from taggit.models import Tag, TaggedItem
+
+    class TaxonomyTag(Tag):
+        class Meta:
+            proxy = True
+            app_label = "djangocms_taxonomy"
+
+    class TaxonomyTaggedItem(TaggedItem):
+        class Meta:
+            proxy = True
+            app_label = "djangocms_taxonomy"
+
+    @admin.register(TaxonomyTag)
+    class TaxonomyTagAdmin(admin.ModelAdmin):
+        search_fields = ("name",)
+        ordering = ("name",)
+
+    @admin.register(TaxonomyTaggedItem)
+    class TaxonomyTaggedItemAdmin(admin.ModelAdmin):
+        raw_id_fields = ("tag",)
