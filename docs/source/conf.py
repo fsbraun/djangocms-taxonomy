@@ -9,11 +9,26 @@ import sys
 # Add the project root to the path
 sys.path.insert(0, os.path.abspath("../../"))
 
+# -- Django setup (required for autodoc importing Django modules) ---------
+# Default to the test settings which are self-contained for this repo.
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
+
+try:
+    import django
+
+    django.setup()
+except Exception as exc:
+    # Keep docs importable even when Django isn't available (e.g. readthedocs
+    # misconfiguration). Autodoc pages that import Django code may fail.
+    print(f"WARNING: Django could not be initialized for autodoc: {exc}")
+
+from djangocms_taxonomy import __version__
+
 # -- Project information -------------------------------------------------------
-project = "Django CMS Taxonomy"
-copyright = "2026, Florian Braun"
-author = "Florian Braun"
-release = "0.1.0"
+project = "django CMS Taxonomy"
+copyright = "2026, Fabian Braun"
+author = "Fabian Braun"
+release = __version__
 
 # -- General configuration -------------------------------------------------------
 extensions = [

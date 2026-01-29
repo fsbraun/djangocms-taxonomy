@@ -92,7 +92,3 @@ if django_apps.is_installed("taggit"):
     class TaxonomyTagAdmin(admin.ModelAdmin):
         search_fields = ("name",)
         ordering = ("name",)
-
-    @admin.register(TaxonomyTaggedItem)
-    class TaxonomyTaggedItemAdmin(admin.ModelAdmin):
-        raw_id_fields = ("tag",)

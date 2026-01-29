@@ -6,7 +6,7 @@ Reference documentation for Django CMS Taxonomy mixins.
 
 Model mixin that adds category support to any Django model.
 
-```{autoclass} djangocms_taxonomy.CategoryMixin
+```{autoclass} djangocms_taxonomy.mixins.CategoryMixin
 :members:
 :undoc-members:
 ```
@@ -29,7 +29,7 @@ categories = post.categories.all()
 
 Form mixin that adds category field to model forms.
 
-```{autoclass} djangocms_taxonomy.CategoryFormMixin
+```{autoclass} djangocms_taxonomy.mixins.CategoryFormMixin
 :members:
 :undoc-members:
 ```
@@ -48,7 +48,7 @@ Called automatically by Django when `form.save()` is invoked with `commit=True`.
 
 Admin mixin that provides category management in Django admin.
 
-```{autoclass} djangocms_taxonomy.CategoryAdminMixin
+```{autoclass} djangocms_taxonomy.mixins.CategoryAdminMixin
 :members:
 :undoc-members:
 ```
