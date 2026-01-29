@@ -4,6 +4,8 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
+import re
+from urllib.parse import urlparse
 
 from .models import Category
 
@@ -57,6 +59,33 @@ class CategoryAdmin(TranslatableAdmin):
             form.base_fields["parent"].queryset = Category.objects.exclude(pk__in=excluded_ids)
 
         return form
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+
+        # Ensure autocomplete for "parent" doesn't allow cycles.
+        if request.GET.get("field_name") == "parent":
+            object_id = request.GET.get("object_id")
+            if not object_id:
+                referer = request.META.get("HTTP_REFERER", "")
+                # Typical admin change URL (path): /admin/<app>/<model>/<id>/change/
+                # The referer can have any scheme/host/prefix and may include a querystring.
+                referer_path = urlparse(referer).path
+                match = re.search(r"/(?P<object_id>\d+)/change/?$", referer_path)
+                if match:
+                    object_id = match.group("object_id")
+            if object_id:
+                try:
+                    current = Category.objects.get(pk=object_id)
+                except (Category.DoesNotExist, ValueError, TypeError):
+                    current = None
+
+                if current is not None:
+                    excluded_ids = Category.objects.descendants_of(current, include_self=True).values_list(
+                        "pk", flat=True
+                    )
+                    queryset = queryset.exclude(pk__in=excluded_ids)
+        return queryset, use_distinct
 
     @admin.display(
         description=_("Name"),

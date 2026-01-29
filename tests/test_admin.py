@@ -207,3 +207,42 @@ class TestCategoryAdmin:
         assert other_root in parent_qs
         assert child not in parent_qs
         assert grandchild not in parent_qs
+
+    def test_parent_autocomplete_search_excludes_self_and_descendants(self):
+        root = Category.objects.create(slug="root")
+        root.set_current_language("en")
+        root.name = "Root"
+        root.save()
+
+        child = Category.objects.create(slug="child", parent=root)
+        child.set_current_language("en")
+        child.name = "Child"
+        child.save()
+
+        grandchild = Category.objects.create(slug="grandchild", parent=child)
+        grandchild.set_current_language("en")
+        grandchild.name = "Grandchild"
+        grandchild.save()
+
+        other_root = Category.objects.create(slug="other")
+        other_root.set_current_language("en")
+        other_root.name = "Other"
+        other_root.save()
+
+        request = self.factory.get(
+            "/admin/autocomplete/",
+            {
+                "app_label": "djangocms_taxonomy",
+                "model_name": "category",
+                "field_name": "parent",
+                "term": "",
+            },
+        )
+        request.user = self.user
+        request.META["HTTP_REFERER"] = f"/admin/djangocms_taxonomy/category/{child.pk}/change/"
+
+        qs, _use_distinct = self.admin.get_search_results(request, Category.objects.all(), "")
+        assert child not in qs
+        assert grandchild not in qs
+        assert root in qs
+        assert other_root in qs
