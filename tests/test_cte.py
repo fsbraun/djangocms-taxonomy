@@ -1,5 +1,7 @@
 """Tests for CTE-based tree queries."""
+
 import pytest
+
 from djangocms_taxonomy.models import Category
 
 

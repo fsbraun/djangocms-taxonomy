@@ -37,6 +37,7 @@ Key architectural decisions and their rationale.
 class MyModel(CategoryMixin, models.Model):
     pass  # Model support only
 
+
 # Or combine them
 @admin.register(MyModel)
 class MyAdmin(CategoryAdminMixin, admin.ModelAdmin):

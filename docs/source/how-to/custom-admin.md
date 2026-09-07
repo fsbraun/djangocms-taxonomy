@@ -11,6 +11,7 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from .models import BlogPost
 
+
 class CustomCategoryAdminMixin(CategoryAdminMixin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
@@ -21,12 +22,13 @@ class CustomCategoryAdminMixin(CategoryAdminMixin):
         readonly = super().get_readonly_fields(request, obj)
         # Add custom readonly fields
         if obj:  # Only for editing
-            readonly.append('created_at')
+            readonly.append("created_at")
         return readonly
+
 
 @admin.register(BlogPost)
 class BlogPostAdmin(CustomCategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'author', 'status')
+    list_display = ("title", "author", "status")
 ```
 
 ## Display Categories in List View
@@ -36,15 +38,17 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from .models import BlogPost
 
+
 @admin.register(BlogPost)
 class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'author', 'category_list')
+    list_display = ("title", "author", "category_list")
 
     def category_list(self, obj):
         """Display categories as comma-separated list."""
         categories = obj.categories.all()
-        return ', '.join([cat.name for cat in categories])
-    category_list.short_description = 'Categories'
+        return ", ".join([cat.name for cat in categories])
+
+    category_list.short_description = "Categories"
     category_list.admin_order_field = None  # Can't order by computed field
 ```
 
@@ -57,9 +61,10 @@ from djangocms_taxonomy import CategoryAdminMixin
 from djangocms_taxonomy.models import CategoryRelation
 from .models import BlogPost
 
+
 class CategoryFilter(admin.SimpleListFilter):
-    title = 'Category'
-    parameter_name = 'category'
+    title = "Category"
+    parameter_name = "category"
 
     def lookups(self, request, model_admin):
         categories = Category.objects.all()
@@ -69,17 +74,17 @@ class CategoryFilter(admin.SimpleListFilter):
         if self.value():
             category_id = self.value()
             ct = ContentType.objects.get_for_model(BlogPost)
-            post_ids = CategoryRelation.objects.filter(
-                category_id=category_id,
-                content_type=ct
-            ).values_list('object_id', flat=True)
+            post_ids = CategoryRelation.objects.filter(category_id=category_id, content_type=ct).values_list(
+                "object_id", flat=True
+            )
             return queryset.filter(id__in=post_ids)
         return queryset
 
+
 @admin.register(BlogPost)
 class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'author', 'status')
-    list_filter = (CategoryFilter, 'status', 'created_at')
+    list_display = ("title", "author", "status")
+    list_filter = (CategoryFilter, "status", "created_at")
 ```
 
 ## Custom Category Widget
@@ -92,6 +97,7 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin, CategoryFormMixin
 from .models import BlogPost
 
+
 class HierarchicalCategoryWidget(CheckboxSelectMultiple):
     """Display categories with hierarchy."""
 
@@ -99,12 +105,14 @@ class HierarchicalCategoryWidget(CheckboxSelectMultiple):
         # Custom rendering logic
         return super().render(name, value, attrs, renderer)
 
+
 class CustomCategoryFormMixin(CategoryFormMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Use custom widget
-        if 'categories' in self.fields:
-            self.fields['categories'].widget = HierarchicalCategoryWidget()
+        if "categories" in self.fields:
+            self.fields["categories"].widget = HierarchicalCategoryWidget()
+
 
 class CustomCategoryAdminMixin(CategoryAdminMixin):
     def get_form(self, request, obj=None, **kwargs):
@@ -115,6 +123,7 @@ class CustomCategoryAdminMixin(CategoryAdminMixin):
             pass
 
         return CombinedForm
+
 
 @admin.register(BlogPost)
 class BlogPostAdmin(CustomCategoryAdminMixin, admin.ModelAdmin):
@@ -129,10 +138,12 @@ If you want to manage categories as inlines (not recommended, but possible):
 from django.contrib import admin
 from djangocms_taxonomy.models import CategoryRelation
 
+
 class CategoryInline(admin.TabularInline):
     model = CategoryRelation
     extra = 1
-    raw_id_fields = ('category',)
+    raw_id_fields = ("category",)
+
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
@@ -151,6 +162,7 @@ from djangocms_taxonomy import CategoryAdminMixin
 from djangocms_taxonomy.models import Category
 from .models import BlogPost
 
+
 class RestrictedCategoryAdminMixin(CategoryAdminMixin):
     def get_form(self, request, obj=None, **kwargs):
         form_class = super().get_form(request, obj, **kwargs)
@@ -160,7 +172,7 @@ class RestrictedCategoryAdminMixin(CategoryAdminMixin):
                 super().__init__(*args, **kwargs)
 
                 # Restrict categories based on user permissions
-                if 'categories' in self.fields:
+                if "categories" in self.fields:
                     if request.user.is_superuser:
                         queryset = Category.objects.all()
                     else:
@@ -169,9 +181,10 @@ class RestrictedCategoryAdminMixin(CategoryAdminMixin):
                             parent__in=[1, 2, 3]  # Specific parent IDs
                         )
 
-                    self.fields['categories'].queryset = queryset
+                    self.fields["categories"].queryset = queryset
 
         return RestrictedForm
+
 
 @admin.register(BlogPost)
 class BlogPostAdmin(RestrictedCategoryAdminMixin, admin.ModelAdmin):

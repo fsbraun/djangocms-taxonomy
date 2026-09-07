@@ -1,4 +1,5 @@
 """Tests for admin interface."""
+
 import pytest
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
@@ -6,7 +7,6 @@ from django.test import RequestFactory
 
 from djangocms_taxonomy.admin import CategoryAdmin
 from djangocms_taxonomy.models import Category
-
 
 User = get_user_model()
 

@@ -12,6 +12,7 @@ Generic relations allow a model to have foreign key relationships to **any** oth
 class BlogPost(models.Model):
     title = models.CharField(max_length=255)
 
+
 class Comment(models.Model):
     post = models.ForeignKey(BlogPost, on_delete=models.CASCADE)
     text = models.TextField()
@@ -25,10 +26,11 @@ class Comment(models.Model):
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+
 class Comment(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
     text = models.TextField()
 ```
 
@@ -40,6 +42,7 @@ Django CMS Taxonomy's `CategoryRelation` model uses this pattern:
 
 ```python
 from django.contrib.contenttypes.models import ContentType
+
 
 class CategoryRelation(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -61,18 +64,14 @@ from djangocms_taxonomy.models import Category, CategoryRelation
 from blog.models import BlogPost
 
 # Create a category
-category = Category.objects.create(name='Django', slug='django')
+category = Category.objects.create(name="Django", slug="django")
 
 # Create a blog post
-post = BlogPost.objects.create(title='Django Tips')
+post = BlogPost.objects.create(title="Django Tips")
 
 # Link them
 content_type = ContentType.objects.get_for_model(BlogPost)
-relation = CategoryRelation.objects.create(
-    category=category,
-    content_type=content_type,
-    object_id=post.id
-)
+relation = CategoryRelation.objects.create(category=category, content_type=content_type, object_id=post.id)
 ```
 
 ### Querying Relations
@@ -91,10 +90,9 @@ for rel in relations:
 
 # Get all categories for a blog post
 content_type = ContentType.objects.get_for_model(BlogPost)
-categories = CategoryRelation.objects.filter(
-    content_type=content_type,
-    object_id=post.id
-).values_list('category', flat=True)
+categories = CategoryRelation.objects.filter(content_type=content_type, object_id=post.id).values_list(
+    "category", flat=True
+)
 
 post_categories = Category.objects.filter(id__in=categories)
 ```
@@ -116,13 +114,16 @@ class BlogPostCategory(models.Model):
     blog_post = models.ForeignKey(BlogPost, ...)
     category = models.ForeignKey(Category, ...)
 
+
 class NewsArticleCategory(models.Model):
     news_article = models.ForeignKey(NewsArticle, ...)
     category = models.ForeignKey(Category, ...)
 
+
 class PhotoCategory(models.Model):
     photo = models.ForeignKey(Photo, ...)
     category = models.ForeignKey(Category, ...)
+
 
 # With generic relations:
 class CategoryRelation(models.Model):
@@ -147,7 +148,7 @@ print(f"Model: {ct.model}")  # blogpost
 print(f"ID: {ct.id}")  # Unique identifier
 
 # Reverse lookup
-ct = ContentType.objects.get(app_label='blog', model='blogpost')
+ct = ContentType.objects.get(app_label="blog", model="blogpost")
 ```
 
 ### Using ContentType in Queries
@@ -180,7 +181,7 @@ for rel in relations:
 
 ```python
 # Good: Fetch content_type in single query
-relations = CategoryRelation.objects.select_related('content_type', 'category')
+relations = CategoryRelation.objects.select_related("content_type", "category")
 for rel in relations:
     print(rel.content_type)  # Already loaded
     print(rel.category)  # Already loaded
@@ -193,8 +194,10 @@ Django CMS Taxonomy provides `CategoryMixin` to avoid these queries:
 ```python
 from djangocms_taxonomy import CategoryMixin
 
+
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
+
 
 # Simple access:
 post = BlogPost.objects.get(id=1)
@@ -232,27 +235,21 @@ If you need custom behavior, you can work with CategoryRelation directly:
 from django.contrib.contenttypes.models import ContentType
 from djangocms_taxonomy.models import Category, CategoryRelation
 
+
 def categorize_object(obj, category_ids):
     """Assign categories to any object."""
     content_type = ContentType.objects.get_for_model(obj.__class__)
 
     # Clear existing
-    CategoryRelation.objects.filter(
-        content_type=content_type,
-        object_id=obj.id
-    ).delete()
+    CategoryRelation.objects.filter(content_type=content_type, object_id=obj.id).delete()
 
     # Create new
     relations = [
-        CategoryRelation(
-            category_id=cat_id,
-            content_type=content_type,
-            object_id=obj.id,
-            order=i
-        )
+        CategoryRelation(category_id=cat_id, content_type=content_type, object_id=obj.id, order=i)
         for i, cat_id in enumerate(category_ids)
     ]
     CategoryRelation.objects.bulk_create(relations)
+
 
 # Usage
 post = BlogPost.objects.get(id=1)

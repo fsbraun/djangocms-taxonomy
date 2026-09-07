@@ -16,7 +16,7 @@ Django's standard approach for trees:
 
 ```python
 class Category(models.Model):
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", null=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 ```
 
@@ -24,14 +24,16 @@ class Category(models.Model):
 
 ```python
 # Bad: N+1 problem
-category = Category.objects.get(slug='python')
+category = Category.objects.get(slug="python")
 all_descendants = []
+
 
 def get_all_descendants(cat):
     children = cat.children.all()
     all_descendants.extend(children)
     for child in children:
         get_all_descendants(child)  # Recursive Python query
+
 
 get_all_descendants(category)
 
@@ -128,7 +130,7 @@ leaves = Category.objects.leaves()
 Get direct children of a category:
 
 ```python
-category = Category.objects.get(slug='python')
+category = Category.objects.get(slug="python")
 children = category.get_children()
 # Equivalent to: category.category_set.all()
 ```
@@ -138,7 +140,7 @@ children = category.get_children()
 Get all descendants (recursive):
 
 ```python
-category = Category.objects.get(slug='programming')
+category = Category.objects.get(slug="programming")
 all_descendants = category.get_descendants()
 
 # Uses CTE for single query:
@@ -164,7 +166,7 @@ for cat in categories:
 print(f"Total queries: 51")
 
 # With CTE:
-categories = Category.objects.with_tree_fields().prefetch_related('children')
+categories = Category.objects.with_tree_fields().prefetch_related("children")
 for cat in categories:
     children = cat.children.all()  # Prefetched, no query
 print(f"Total queries: 1-2")
@@ -207,11 +209,11 @@ from django.db.models import Q, Prefetch
 depth_2 = Category.objects.with_tree_fields().filter(depth=2)
 
 # Get leaf categories ordered by tree path
-leaves = Category.objects.leaves().order_by('path')
+leaves = Category.objects.leaves().order_by("path")
 
 # Get all descendants of a category with specific name
-root = Category.objects.get(name='Programming')
-descendants = root.get_descendants().filter(name__icontains='Python')
+root = Category.objects.get(name="Programming")
+descendants = root.get_descendants().filter(name__icontains="Python")
 ```
 
 ## Limitations

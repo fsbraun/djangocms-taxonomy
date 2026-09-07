@@ -10,6 +10,7 @@ Adds a `categories` property to any Django model that provides reverse relation 
 from django.db import models
 from djangocms_taxonomy import CategoryMixin
 
+
 class Article(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -73,10 +74,11 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from myapp.models import Article
 
+
 @admin.register(Article)
 class ArticleAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'created')
-    search_fields = ('title',)
+    list_display = ("title", "created")
+    search_fields = ("title",)
 ```
 
 This automatically adds:
@@ -93,18 +95,21 @@ For complete integration, use both mixins:
 from django.db import models
 from djangocms_taxonomy import CategoryMixin
 
+
 class Article(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
+
 
 # admin.py
 from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from .models import Article
 
+
 @admin.register(Article)
 class ArticleAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title',)
+    list_display = ("title",)
 ```
 
 Now you can:

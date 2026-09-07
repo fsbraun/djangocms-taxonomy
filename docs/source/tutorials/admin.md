@@ -11,10 +11,11 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from .models import BlogPost
 
+
 @admin.register(BlogPost)
 class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'created_at')
-    search_fields = ('title', 'content')
+    list_display = ("title", "created_at")
+    search_fields = ("title", "content")
 ```
 
 ## What the Mixin Provides
@@ -49,13 +50,14 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from .models import BlogPost
 
+
 @admin.register(BlogPost)
 class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'author', 'status', 'created_at')
-    list_filter = ('status', 'created_at')
-    search_fields = ('title', 'content')
-    prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ("title", "author", "status", "created_at")
+    list_filter = ("status", "created_at")
+    search_fields = ("title", "content")
+    prepopulated_fields = {"slug": ("title",)}
+    readonly_fields = ("created_at", "updated_at")
 ```
 
 ## Category Management Admin
@@ -93,18 +95,17 @@ class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
         qs = super().get_queryset(request)
 
         # Filter by category if requested
-        category_id = request.GET.get('category')
+        category_id = request.GET.get("category")
         if category_id:
             from djangocms_taxonomy.models import CategoryRelation
-            related = CategoryRelation.objects.filter(
-                category_id=category_id
-            ).values_list('object_id', flat=True)
+
+            related = CategoryRelation.objects.filter(category_id=category_id).values_list("object_id", flat=True)
             from django.contrib.contenttypes.models import ContentType
+
             ct = ContentType.objects.get_for_model(BlogPost)
-            related = CategoryRelation.objects.filter(
-                category_id=category_id,
-                content_type=ct
-            ).values_list('object_id', flat=True)
+            related = CategoryRelation.objects.filter(category_id=category_id, content_type=ct).values_list(
+                "object_id", flat=True
+            )
             qs = qs.filter(id__in=related)
 
         return qs
