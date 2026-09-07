@@ -12,13 +12,10 @@ from djangocms_taxonomy.models import Category, CategoryRelation
 from django.contrib.contenttypes.models import ContentType
 
 # Get all posts in a specific category
-category = Category.objects.get(slug='django')
+category = Category.objects.get(slug="django")
 ct = ContentType.objects.get_for_model(BlogPost)
 
-post_ids = CategoryRelation.objects.filter(
-    category=category,
-    content_type=ct
-).values_list('object_id', flat=True)
+post_ids = CategoryRelation.objects.filter(category=category, content_type=ct).values_list("object_id", flat=True)
 
 posts = BlogPost.objects.filter(id__in=post_ids)
 ```
@@ -27,13 +24,12 @@ posts = BlogPost.objects.filter(id__in=post_ids)
 
 ```python
 # Get posts that are in ANY of these categories
-categories = Category.objects.filter(slug__in=['django', 'python'])
+categories = Category.objects.filter(slug__in=["django", "python"])
 ct = ContentType.objects.get_for_model(BlogPost)
 
-post_ids = CategoryRelation.objects.filter(
-    category__in=categories,
-    content_type=ct
-).values_list('object_id', flat=True)
+post_ids = CategoryRelation.objects.filter(category__in=categories, content_type=ct).values_list(
+    "object_id", flat=True
+)
 
 posts = BlogPost.objects.filter(id__in=post_ids).distinct()
 ```
@@ -42,16 +38,13 @@ posts = BlogPost.objects.filter(id__in=post_ids).distinct()
 
 ```python
 # Get posts that are in ALL of these categories
-category_slugs = ['django', 'tutorial']
+category_slugs = ["django", "tutorial"]
 
 for slug in category_slugs:
     category = Category.objects.get(slug=slug)
     ct = ContentType.objects.get_for_model(BlogPost)
 
-    post_ids = CategoryRelation.objects.filter(
-        category=category,
-        content_type=ct
-    ).values_list('object_id', flat=True)
+    post_ids = CategoryRelation.objects.filter(category=category, content_type=ct).values_list("object_id", flat=True)
 
     posts = posts.filter(id__in=post_ids)
 ```
@@ -60,13 +53,12 @@ for slug in category_slugs:
 
 ```python
 # Get posts NOT in a specific category
-exclude_category = Category.objects.get(slug='deprecated')
+exclude_category = Category.objects.get(slug="deprecated")
 ct = ContentType.objects.get_for_model(BlogPost)
 
-exclude_ids = CategoryRelation.objects.filter(
-    category=exclude_category,
-    content_type=ct
-).values_list('object_id', flat=True)
+exclude_ids = CategoryRelation.objects.filter(category=exclude_category, content_type=ct).values_list(
+    "object_id", flat=True
+)
 
 posts = BlogPost.objects.exclude(id__in=exclude_ids)
 ```
@@ -81,10 +73,7 @@ categories = Category.objects.all()
 
 for category in categories:
     ct = ContentType.objects.get_for_model(BlogPost)
-    count = CategoryRelation.objects.filter(
-        category=category,
-        content_type=ct
-    ).count()
+    count = CategoryRelation.objects.filter(category=category, content_type=ct).count()
     print(f"{category.name}: {count} posts")
 ```
 
@@ -98,6 +87,7 @@ Create a helper method on your model for convenience:
 from django.db import models
 from djangocms_taxonomy import CategoryMixin
 
+
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
     # ... other fields
@@ -109,12 +99,12 @@ class BlogPost(CategoryMixin, models.Model):
         from django.contrib.contenttypes.models import ContentType
 
         ct = ContentType.objects.get_for_model(cls)
-        post_ids = CategoryRelation.objects.filter(
-            category=category,
-            content_type=ct
-        ).values_list('object_id', flat=True)
+        post_ids = CategoryRelation.objects.filter(category=category, content_type=ct).values_list(
+            "object_id", flat=True
+        )
 
         return cls.objects.filter(id__in=post_ids)
+
 
 # Usage
 django_posts = BlogPost.by_category(django_category)
@@ -139,8 +129,8 @@ Or better, do the filtering in views:
 # views.py
 class BlogPostListView(ListView):
     def get_queryset(self):
-        category_slug = self.kwargs.get('category_slug')
-        qs = BlogPost.objects.filter(status='published')
+        category_slug = self.kwargs.get("category_slug")
+        qs = BlogPost.objects.filter(status="published")
 
         if category_slug:
             category = get_object_or_404(Category, slug=category_slug)

@@ -1,11 +1,12 @@
-from django.contrib import admin
+import re
+from urllib.parse import urlparse
+
 from django.apps import apps as django_apps
+from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
-import re
-from urllib.parse import urlparse
 
 from .models import Category
 

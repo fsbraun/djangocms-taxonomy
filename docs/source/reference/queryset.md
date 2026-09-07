@@ -59,7 +59,7 @@ Get direct child categories.
 
 **Example**:
 ```python
-category = Category.objects.get(slug='programming')
+category = Category.objects.get(slug="programming")
 children = category.get_children()
 
 # Returns only direct children, not grandchildren
@@ -73,7 +73,7 @@ Get all descendant categories (children, grandchildren, etc.).
 
 **Example**:
 ```python
-category = Category.objects.get(slug='programming')
+category = Category.objects.get(slug="programming")
 descendants = category.get_descendants()
 
 # Returns all categories under this one in the tree
@@ -88,10 +88,10 @@ QuerySet methods can be chained:
 roots = Category.objects.with_tree_fields().roots()
 
 # Get leaf categories ordered by name
-leaves = Category.objects.leaves().order_by('name')
+leaves = Category.objects.leaves().order_by("name")
 
 # Get descendants of a category with depth
-parent = Category.objects.get(slug='python')
+parent = Category.objects.get(slug="python")
 descendants = parent.get_descendants().with_tree_fields()
 ```
 
@@ -104,10 +104,10 @@ Filter on annotated fields:
 categories = Category.objects.with_tree_fields().filter(depth=2)
 
 # Get categories with certain slug patterns
-technical = Category.objects.filter(slug__in=['python', 'javascript', 'golang'])
+technical = Category.objects.filter(slug__in=["python", "javascript", "golang"])
 
 # Combine filters
-root_tech = Category.objects.roots().filter(slug__startswith='tech-')
+root_tech = Category.objects.roots().filter(slug__startswith="tech-")
 ```
 
 ## Performance
@@ -124,7 +124,7 @@ Avoid N+1 problems by prefetching relations:
 
 ```python
 # Good: Prefetch all tree fields in one query
-categories = Category.objects.with_tree_fields().prefetch_related('children')
+categories = Category.objects.with_tree_fields().prefetch_related("children")
 
 # Use in views
 for cat in categories:

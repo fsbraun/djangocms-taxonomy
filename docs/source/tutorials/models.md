@@ -10,6 +10,7 @@ Import and add `CategoryMixin` to your model:
 from django.db import models
 from djangocms_taxonomy import CategoryMixin
 
+
 class Article(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
@@ -17,7 +18,7 @@ class Article(CategoryMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
@@ -37,10 +38,10 @@ all_categories = article.categories.all()
 category_count = article.categories.count()
 
 # Filter categories
-tech_categories = article.categories.filter(name__icontains='tech')
+tech_categories = article.categories.filter(name__icontains="tech")
 
 # Order categories
-sorted_categories = article.categories.order_by('name')
+sorted_categories = article.categories.order_by("name")
 ```
 
 ## Hierarchical Category Queries
@@ -74,10 +75,10 @@ ordered_cats = article.categories.all()
 
 # Access the order through the relation
 from djangocms_taxonomy.models import CategoryRelation
+
 relations = CategoryRelation.objects.filter(
-    content_type=ContentType.objects.get_for_model(Article),
-    object_id=article.id
-).order_by('order')
+    content_type=ContentType.objects.get_for_model(Article), object_id=article.id
+).order_by("order")
 
 for rel in relations:
     print(f"{rel.order}: {rel.category.name}")
@@ -91,9 +92,11 @@ You can add `CategoryMixin` to multiple models. The `Category` model uses generi
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
 
+
 class NewsArticle(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
     source = models.CharField(max_length=255)
+
 
 # Both can share the same categories
 blog = BlogPost.objects.create(title="Django Tips")
@@ -101,17 +104,14 @@ news = NewsArticle.objects.create(title="Django 5.0 Released", source="Official"
 
 # They use the same Category objects through different relations
 from djangocms_taxonomy.models import Category
+
 cat = Category.objects.create(name="Django")
 
 CategoryRelation.objects.create(
-    category=cat,
-    content_type=ContentType.objects.get_for_model(BlogPost),
-    object_id=blog.id
+    category=cat, content_type=ContentType.objects.get_for_model(BlogPost), object_id=blog.id
 )
 CategoryRelation.objects.create(
-    category=cat,
-    content_type=ContentType.objects.get_for_model(NewsArticle),
-    object_id=news.id
+    category=cat, content_type=ContentType.objects.get_for_model(NewsArticle), object_id=news.id
 )
 ```
 
@@ -127,5 +127,6 @@ for article in articles:
 
 # Better - prefetch related
 from django.db.models import Prefetch
-articles = Article.objects.prefetch_related('categoryrelation_set').all()
+
+articles = Article.objects.prefetch_related("categoryrelation_set").all()
 ```

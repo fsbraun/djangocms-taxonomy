@@ -10,26 +10,26 @@ Ensure django-parler is installed and configured:
 # settings.py
 
 INSTALLED_APPS = [
-    'parler',
-    'djangocms_taxonomy',
+    "parler",
+    "djangocms_taxonomy",
 ]
 
 LANGUAGES = [
-    ('en', 'English'),
-    ('de', 'Deutsch'),
-    ('fr', 'Français'),
+    ("en", "English"),
+    ("de", "Deutsch"),
+    ("fr", "Français"),
 ]
 
 PARLER_LANGUAGES = {
     None: (
-        {'code': 'en'},
-        {'code': 'de'},
-        {'code': 'fr'},
+        {"code": "en"},
+        {"code": "de"},
+        {"code": "fr"},
     ),
-    'default': {
-        'fallback': 'en',
-        'hide_untranslated': False,
-    }
+    "default": {
+        "fallback": "en",
+        "hide_untranslated": False,
+    },
 }
 ```
 
@@ -41,20 +41,17 @@ PARLER_LANGUAGES = {
 from djangocms_taxonomy.models import Category
 
 # Create a category with English name
-category = Category.objects.create(
-    name='Django',
-    slug='django'
-)
+category = Category.objects.create(name="Django", slug="django")
 
 # Add translations
 category.translations.create(
-    language_code='de',
-    name='Django',  # German translation
+    language_code="de",
+    name="Django",  # German translation
 )
 
 category.translations.create(
-    language_code='fr',
-    name='Django',  # French translation
+    language_code="fr",
+    name="Django",  # French translation
 )
 ```
 
@@ -75,19 +72,19 @@ The Category admin automatically includes translation fields:
 ```python
 from django.utils.translation import get_language
 
-category = Category.objects.get(slug='django')
+category = Category.objects.get(slug="django")
 
 # Get name in current language
 current_name = category.name  # Uses current language
 
 # Access specific language
-de_name = category.safe_translation_getter('name', language_code='de')
+de_name = category.safe_translation_getter("name", language_code="de")
 ```
 
 ### List All Translations
 
 ```python
-category = Category.objects.get(slug='django')
+category = Category.objects.get(slug="django")
 
 for translation in category.translations.all():
     print(f"{translation.language_code}: {translation.name}")
@@ -99,7 +96,7 @@ for translation in category.translations.all():
 # Find categories with a specific name in a language
 from parler.utils.context import switch_language
 
-categories = Category.objects.language('de').filter(name='Python')
+categories = Category.objects.language("de").filter(name="Python")
 ```
 
 ## Templates with Translations
@@ -138,22 +135,23 @@ from django.utils.translation import activate
 from parler.utils.context import switch_language
 from djangocms_taxonomy.models import Category
 
+
 class CategoryDetailView(DetailView):
     model = Category
-    slug_field = 'slug'
+    slug_field = "slug"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         # Ensure translations are available for all languages
         category = self.get_object()
-        context['translations'] = {}
+        context["translations"] = {}
 
         for lang_code, lang_name in self.request.LANGUAGES:
             with switch_language(category, lang_code):
-                context['translations'][lang_code] = {
-                    'name': category.name,
-                    'description': category.description,
+                context["translations"][lang_code] = {
+                    "name": category.name,
+                    "description": category.description,
                 }
 
         return context
@@ -166,14 +164,14 @@ Configure fallback behavior in settings:
 ```python
 PARLER_LANGUAGES = {
     None: (
-        {'code': 'en'},
-        {'code': 'de'},
-        {'code': 'fr'},
+        {"code": "en"},
+        {"code": "de"},
+        {"code": "fr"},
     ),
-    'default': {
-        'fallback': 'en',  # Fall back to English if translation missing
-        'hide_untranslated': False,  # Show categories even if untranslated
-    }
+    "default": {
+        "fallback": "en",  # Fall back to English if translation missing
+        "hide_untranslated": False,  # Show categories even if untranslated
+    },
 }
 ```
 

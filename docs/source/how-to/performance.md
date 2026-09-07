@@ -19,15 +19,13 @@ for post in posts:
     categories = post.categories.all()  # N queries
 
 # Better: Prefetch all categories in 2 queries
-posts = BlogPost.objects.prefetch_related('categoryrelation_set').all()
+posts = BlogPost.objects.prefetch_related("categoryrelation_set").all()
 for post in posts:
     categories = post.categories.all()  # No additional queries
 
 # Best: Custom prefetch with select_related
-relations = CategoryRelation.objects.select_related('category')
-posts = BlogPost.objects.prefetch_related(
-    Prefetch('categoryrelation_set', queryset=relations)
-).all()
+relations = CategoryRelation.objects.select_related("category")
+posts = BlogPost.objects.prefetch_related(Prefetch("categoryrelation_set", queryset=relations)).all()
 ```
 
 ### Use only() and defer()
@@ -36,10 +34,10 @@ Limit fields retrieved from database:
 
 ```python
 # Get only necessary fields
-posts = BlogPost.objects.only('id', 'title').all()
+posts = BlogPost.objects.only("id", "title").all()
 
 # Exclude large fields
-posts = BlogPost.objects.defer('content').all()
+posts = BlogPost.objects.defer("content").all()
 ```
 
 ## CTE Query Optimization
@@ -50,7 +48,7 @@ Django CMS Taxonomy uses CTEs for efficient tree queries:
 from djangocms_taxonomy.models import Category
 
 # Efficient: Single CTE query to get tree structure
-root = Category.objects.get(slug='programming')
+root = Category.objects.get(slug="programming")
 children = root.get_children()  # Uses CTE
 descendants = root.get_descendants()  # Uses CTE
 ```
@@ -64,9 +62,10 @@ from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 from djangocms_taxonomy.models import Category
 
+
 def get_category_tree():
     """Get category tree with caching."""
-    cache_key = 'category_tree'
+    cache_key = "category_tree"
     tree = cache.get(cache_key)
 
     if tree is None:
@@ -75,10 +74,11 @@ def get_category_tree():
 
     return tree
 
+
 @cache_page(60 * 15)  # Cache view for 15 minutes
 def category_list(request):
     categories = get_category_tree()
-    return render(request, 'categories/list.html', {'categories': categories})
+    return render(request, "categories/list.html", {"categories": categories})
 ```
 
 ### Cache Category Filtering
@@ -89,17 +89,17 @@ from django.contrib.contenttypes.models import ContentType
 from djangocms_taxonomy.models import CategoryRelation
 from blog.models import BlogPost
 
+
 def get_posts_by_category(category_id):
     """Get posts in category with caching."""
-    cache_key = f'posts_category_{category_id}'
+    cache_key = f"posts_category_{category_id}"
     posts = cache.get(cache_key)
 
     if posts is None:
         ct = ContentType.objects.get_for_model(BlogPost)
-        post_ids = CategoryRelation.objects.filter(
-            category_id=category_id,
-            content_type=ct
-        ).values_list('object_id', flat=True)
+        post_ids = CategoryRelation.objects.filter(category_id=category_id, content_type=ct).values_list(
+            "object_id", flat=True
+        )
 
         posts = list(BlogPost.objects.filter(id__in=post_ids))
         cache.set(cache_key, posts, 3600)
@@ -130,12 +130,7 @@ ct = ContentType.objects.get_for_model(BlogPost)
 categories = [1, 2, 3]  # Category IDs
 
 relations = [
-    CategoryRelation(
-        category_id=cat_id,
-        content_type=ct,
-        object_id=post.id,
-        order=i
-    )
+    CategoryRelation(category_id=cat_id, content_type=ct, object_id=post.id, order=i)
     for i, cat_id in enumerate(categories)
 ]
 
@@ -153,10 +148,8 @@ categories = Category.objects.all()  # Separate query
 # Better: Select related when accessing category details
 from django.db.models import Prefetch
 
-relations = CategoryRelation.objects.select_related('category')
-posts = BlogPost.objects.prefetch_related(
-    Prefetch('categoryrelation_set', queryset=relations)
-)
+relations = CategoryRelation.objects.select_related("category")
+posts = BlogPost.objects.prefetch_related(Prefetch("categoryrelation_set", queryset=relations))
 
 # Now accessing category.name doesn't trigger new query
 for post in posts:
@@ -173,10 +166,7 @@ from blog.models import BlogPost
 
 # Efficient deletion
 ct = ContentType.objects.get_for_model(BlogPost)
-CategoryRelation.objects.filter(
-    content_type=ct,
-    object_id__in=[1, 2, 3]
-).delete()  # Single query
+CategoryRelation.objects.filter(content_type=ct, object_id__in=[1, 2, 3]).delete()  # Single query
 ```
 
 ## Monitoring Performance
@@ -186,11 +176,11 @@ Use Django Debug Toolbar to monitor queries:
 ```python
 # settings/development.py
 
-INSTALLED_APPS += ['debug_toolbar']
+INSTALLED_APPS += ["debug_toolbar"]
 
-MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
-INTERNAL_IPS = ['127.0.0.1']
+INTERNAL_IPS = ["127.0.0.1"]
 ```
 
 Monitor query count when working with categories to identify N+1 problems.

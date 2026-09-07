@@ -42,6 +42,7 @@ Use `CategoryMixin` to add category support to any Django model:
 from django.db import models
 from djangocms_taxonomy import CategoryMixin
 
+
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
@@ -72,10 +73,11 @@ from django.contrib import admin
 from djangocms_taxonomy import CategoryAdminMixin
 from .models import BlogPost
 
+
 @admin.register(BlogPost)
 class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
-    list_display = ('title', 'created_at')
-    search_fields = ('title', 'content')
+    list_display = ("title", "created_at")
+    search_fields = ("title", "content")
 ```
 
 The mixin automatically:

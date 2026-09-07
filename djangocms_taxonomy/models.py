@@ -135,7 +135,6 @@ class CategoryManager(models.Manager.from_queryset(CategoryQuerySet)):
         return qs.exclude(pk=category_id)
 
 
-
 class Category(TranslatableModel):
     """
     A hierarchical category model for taxonomy management.

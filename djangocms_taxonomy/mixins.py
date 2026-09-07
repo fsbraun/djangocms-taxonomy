@@ -1,6 +1,7 @@
 """Model and admin mixins for category integration with Django models."""
 
-from typing import TYPE_CHECKING, Any, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib import admin

@@ -10,7 +10,6 @@ from djangocms_taxonomy.mixins import CategoryAdminMixin
 from djangocms_taxonomy.models import Category, CategoryRelation
 from tests.test_app.models import TestModel
 
-
 User = get_user_model()
 
 
@@ -166,9 +165,7 @@ class TestCategoryAdminMixin:
         admin_instance = TestModelAdmin(TestModel, AdminSite())
         filters = admin_instance.get_list_filter(request)
 
-        assert any(
-            getattr(f, "__name__", "") == "CategoryRelationListFilter" for f in filters
-        )
+        assert any(getattr(f, "__name__", "") == "CategoryRelationListFilter" for f in filters)
 
     def test_category_list_filter_filters_by_category_and_none(self) -> None:
         from tests.test_app.admin import TestModelAdmin
